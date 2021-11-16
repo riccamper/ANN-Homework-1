@@ -5,10 +5,10 @@
 #############################
 
 # Import needed libraries
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' # Suppress warnings
-from datetime import datetime
 import tensorflow as tf
+from datetime import datetime
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress warnings
 tf.get_logger().setLevel('ERROR')
 
 # Model builder function
@@ -113,7 +113,7 @@ def buildModel(input_shape, classes, tfk, tfkl, seed):
 # Callbacks function for training (callbacks, checkpointing, early stopping)
 def trainingCallbacks(model_name, folder_name):
 
-	# Create folders
+    # Create folders
     exps_dir = os.path.join(folder_name)
     if not os.path.exists(exps_dir):
         os.makedirs(exps_dir)
@@ -152,5 +152,5 @@ def trainingCallbacks(model_name, folder_name):
         monitor='val_loss', patience=10, restore_best_weights=True)
     callbacks.append(es_callback)
 
-	# Return callbacks
+    # Return callbacks
     return callbacks
