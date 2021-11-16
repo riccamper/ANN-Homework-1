@@ -56,23 +56,25 @@ valid_gen = train_val_gen['validation']
 input_shape = (256, 256, 3)
 classes = 14
 epochs = 200
+model_name = 'CNN'
+folder_name = 'CNN'
 
 # Build model (for data augmentation training)
 model = buildModel(input_shape, classes, tfk, tfkl, seed)
 
 # Create folders and callbacks and fit
-aug_callbacks = trainingCallbacks(model_name='CNN_Aug')
+callbacks = trainingCallbacks(model_name=model_name, folder_name=folder_name)
 
 # Train the model
 history = model.fit(
     x = train_gen,
     epochs = epochs,
     validation_data = valid_gen,
-    callbacks = aug_callbacks,
+    callbacks = callbacks,
 ).history
 
 # Save best epoch model
-model.save("data_augmentation_experiments/CNN_Aug_Best")
+model.save(folder_name + "/" + model_name + "_best")
 
 # Evaluation
 #model_aug_test_metrics = model.evaluate(test_gen, return_dict=True)

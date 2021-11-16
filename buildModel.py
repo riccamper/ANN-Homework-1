@@ -111,10 +111,10 @@ def buildModel(input_shape, classes, tfk, tfkl, seed):
 
 
 # Callbacks function for training (callbacks, checkpointing, early stopping)
-def trainingCallbacks(model_name):
+def trainingCallbacks(model_name, folder_name):
 
 	# Create folders
-    exps_dir = os.path.join('data_augmentation_experiments')
+    exps_dir = os.path.join(folder_name)
     if not os.path.exists(exps_dir):
         os.makedirs(exps_dir)
 
