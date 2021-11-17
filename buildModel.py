@@ -171,7 +171,7 @@ def buildModelVGG16(input_shape, classes, tfk, tfkl, seed):
 
     # Compile the model
     tl_model.compile(loss=tfk.losses.CategoricalCrossentropy(),
-                     optimizer=tfk.optimizers.Adam(), metrics='accuracy')
+                     optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1, precision, recall])
 
     # Return the model
     return tl_model
