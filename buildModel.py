@@ -5,35 +5,35 @@
 #############################
 
 # Import needed libraries
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress warnings
+from datetime import datetime
+from keras import backend as K
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+import numpy as np
 import tensorflow as tf
 tf.get_logger().setLevel('ERROR')
-import numpy as np
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
-from keras import backend as K
-from datetime import datetime
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress warnings
 
 
 # Evaluation parameters
-def recall_m(y_true, y_pred):
+def recall(y_true, y_pred):
     true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
     possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
     recall = true_positives / (possible_positives + K.epsilon())
     return recall
 
 
-def precision_m(y_true, y_pred):
+def precision(y_true, y_pred):
     true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
     predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
     precision = true_positives / (predicted_positives + K.epsilon())
     return precision
 
 
-def f1_m(y_true, y_pred):
-    precision = precision_m(y_true, y_pred)
-    recall = recall_m(y_true, y_pred)
-    return 2*((precision*recall)/(precision+recall+K.epsilon()))
+def f1(y_true, y_pred):
+    precision2 = precision(y_true, y_pred)
+    recall2 = recall(y_true, y_pred)
+    return 2*((precision2*recall2)/(precision2+recall2+K.epsilon()))
 
 
 # Model builder function
@@ -129,16 +129,58 @@ def buildModel(input_shape, classes, tfk, tfkl, seed):
 
     # Compile the model
     model.compile(loss=tfk.losses.CategoricalCrossentropy(),
-                  optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1_m, precision_m, recall_m])
+                  optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1, precision, recall])
 
     # Return the model
     return model
 
 
+# Model builder function (VGG16)
+def buildModelVGG16(input_shape, classes, tfk, tfkl, seed):
+    # VGG16
+
+    # Supernet
+    supernet = tfk.applications.VGG16(
+        include_top=False,
+        weights="imagenet",
+        input_shape=(64, 64, 3)
+    )
+    supernet.summary()
+    # tfk.utils.plot_model(supernet)
+
+    # Use the supernet as feature extractor
+    supernet.trainable = False
+
+    inputs = tfk.Input(shape=input_shape, name='Input')
+    x = tfkl.Resizing(64, 64, interpolation="bicubic")(inputs)
+    x = supernet(x)
+    x = tfkl.Flatten(name='Flattening')(x)
+    x = tfkl.Dropout(0.3, seed=seed)(x)
+    x = tfkl.Dense(
+        256,
+        activation='relu',
+        kernel_initializer=tfk.initializers.GlorotUniform(seed))(x)
+    x = tfkl.Dropout(0.3, seed=seed)(x)
+    outputs = tfkl.Dense(
+        classes,
+        activation='softmax',
+        kernel_initializer=tfk.initializers.GlorotUniform(seed))(x)
+
+    # Connect input and output through the Model class
+    tl_model = tfk.Model(inputs=inputs, outputs=outputs, name='model')
+
+    # Compile the model
+    tl_model.compile(loss=tfk.losses.CategoricalCrossentropy(),
+                     optimizer=tfk.optimizers.Adam(), metrics='accuracy')
+
+    # Return the model
+    return tl_model
+
+
 # Callbacks function for training (callbacks, checkpointing, early stopping)
 def trainingCallbacks(model_name, folder_name, logs):
 
-	# Init callbacks
+    # Init callbacks
     callbacks = []
 
     # Create folders
