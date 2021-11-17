@@ -23,7 +23,6 @@ import seaborn as sns
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.metrics import confusion_matrix
 from PIL import Image
 
@@ -49,7 +48,7 @@ training_dir = os.path.join(dataset_dir, 'training')
 
 # Load dataset
 train_val_gen = loadData(training_dir, 0.1, seed)
-train_gen = train_val_gen['train']
+train_gen = train_val_gen['train_no_aug']
 valid_gen = train_val_gen['validation']
 
 # Model metadata
@@ -63,7 +62,7 @@ folder_name = 'CNN'
 model = buildModel(input_shape, classes, tfk, tfkl, seed)
 
 # Create folders and callbacks and fit
-callbacks = trainingCallbacks(model_name=model_name, folder_name=folder_name)
+callbacks = trainingCallbacks(model_name=model_name, folder_name=folder_name, logs=True)
 
 # Train the model
 history = model.fit(

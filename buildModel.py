@@ -5,13 +5,17 @@
 #############################
 
 # Import needed libraries
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 import tensorflow as tf
 from datetime import datetime
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress warnings
 tf.get_logger().setLevel('ERROR')
+import numpy as np 
 
 # Model builder function
+
+
 def buildModel(input_shape, classes, tfk, tfkl, seed):
     # (Conv + ReLU + MaxPool) x 5 + FC x 2
 
@@ -111,41 +115,42 @@ def buildModel(input_shape, classes, tfk, tfkl, seed):
 
 
 # Callbacks function for training (callbacks, checkpointing, early stopping)
-def trainingCallbacks(model_name, folder_name):
+def trainingCallbacks(model_name, folder_name, logs):
 
     # Create folders
-    exps_dir = os.path.join(folder_name)
-    if not os.path.exists(exps_dir):
-        os.makedirs(exps_dir)
+    if logs:
+        exps_dir = os.path.join(folder_name)
+        if not os.path.exists(exps_dir):
+            os.makedirs(exps_dir)
 
-    now = datetime.now().strftime('%b%d_%H-%M-%S')
+        now = datetime.now().strftime('%b%d_%H-%M-%S')
 
-    exp_dir = os.path.join(exps_dir, model_name + '_' + str(now))
-    if not os.path.exists(exp_dir):
-        os.makedirs(exp_dir)
+        exp_dir = os.path.join(exps_dir, model_name + '_' + str(now))
+        if not os.path.exists(exp_dir):
+            os.makedirs(exp_dir)
 
-    callbacks = []
+        callbacks = []
 
-    # Model checkpoint
-    ckpt_dir = os.path.join(exp_dir, 'ckpts')
-    if not os.path.exists(ckpt_dir):
-        os.makedirs(ckpt_dir)
+        # Model checkpoint
+        ckpt_dir = os.path.join(exp_dir, 'ckpts')
+        if not os.path.exists(ckpt_dir):
+            os.makedirs(ckpt_dir)
 
-    ckpt_callback = tf.keras.callbacks.ModelCheckpoint(filepath=os.path.join(ckpt_dir, 'cp.ckpt'),
-                                                       save_weights_only=False,  # True to save only weights
-                                                       save_best_only=False)  # True to save only the best epoch
-    callbacks.append(ckpt_callback)
+        ckpt_callback = tf.keras.callbacks.ModelCheckpoint(filepath=os.path.join(ckpt_dir, 'cp.ckpt'),
+                                                           save_weights_only=False,  # True to save only weights
+                                                           save_best_only=False)  # True to save only the best epoch
+        callbacks.append(ckpt_callback)
 
-    # Visualize Learning on Tensorboard
-    tb_dir = os.path.join(exp_dir, 'tb_logs')
-    if not os.path.exists(tb_dir):
-        os.makedirs(tb_dir)
+        # Visualize Learning on Tensorboard
+        tb_dir = os.path.join(exp_dir, 'tb_logs')
+        if not os.path.exists(tb_dir):
+            os.makedirs(tb_dir)
 
-    # By default shows losses and metrics for both training and validation
-    tb_callback = tf.keras.callbacks.TensorBoard(log_dir=tb_dir,
-                                                 profile_batch=0,
-                                                 histogram_freq=1)  # if > 0 (epochs) shows weights histograms
-    callbacks.append(tb_callback)
+        # By default shows losses and metrics for both training and validation
+        tb_callback = tf.keras.callbacks.TensorBoard(log_dir=tb_dir,
+                                                     profile_batch=0,
+                                                     histogram_freq=1)  # if > 0 (epochs) shows weights histograms
+        callbacks.append(tb_callback)
 
     # Early Stopping
     es_callback = tf.keras.callbacks.EarlyStopping(

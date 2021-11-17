@@ -8,6 +8,8 @@
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 # Data loader function
+
+
 def loadData(training_dir, validation_split, seed):
     # Images are divided into folders, one for each class.
     # If the images are organized in such a way, we can exploit the
@@ -25,6 +27,10 @@ def loadData(training_dir, validation_split, seed):
                                         validation_split=validation_split)
 
     # Create an instance of ImageDataGenerator with no Data Augmentation
+    train_data_gen_no_aug = ImageDataGenerator(rescale=1/255.,
+                                               validation_split=validation_split)
+
+    # Create an instance of ImageDataGenerator with no Data Augmentation
     valid_data_gen = ImageDataGenerator(rescale=1/255.,
                                         validation_split=validation_split)
 
@@ -38,6 +44,18 @@ def loadData(training_dir, validation_split, seed):
                                                    shuffle=True,
                                                    seed=seed,
                                                    subset='training')
+
+    # Obtain a data generator with the 'ImageDataGenerator.flow_from_directory' method
+    train_gen_no_aug = train_data_gen_no_aug.flow_from_directory(directory=training_dir,
+                                                                 target_size=(
+                                                                     256, 256),
+                                                                 color_mode='rgb',
+                                                                 classes=None,  # can be set to labels
+                                                                 class_mode='categorical',
+                                                                 batch_size=8,
+                                                                 shuffle=True,
+                                                                 seed=seed,
+                                                                 subset='training')
 
     # Obtain a data generator with the 'ImageDataGenerator.flow_from_directory' method
     valid_gen = valid_data_gen.flow_from_directory(directory=training_dir,
@@ -58,4 +76,4 @@ def loadData(training_dir, validation_split, seed):
     print()
 
     # Return dataset
-    return {"train": train_gen, "validation": valid_gen}
+    return {"train": train_gen, "train_no_aug": train_gen_no_aug, "validation": valid_gen}
