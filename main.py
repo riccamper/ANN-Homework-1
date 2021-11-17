@@ -9,7 +9,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' # Suppress warnings
 import tensorflow as tf
 tf.get_logger().setLevel('ERROR') # Suppress warnings
-from buildModel import buildModel, buildModelVGG16, trainingCallbacks
+from buildModel import buildModel, buildModelVGG16, trainingCallbacks, f1
 from dataLoader import loadData
 import random
 import pandas as pd
@@ -20,6 +20,7 @@ from sklearn.metrics import confusion_matrix
 from PIL import Image
 from datetime import datetime
 import numpy as np
+
 
 # Init message
 print('')
@@ -56,37 +57,57 @@ valid_gen = train_val_gen['validation']
 input_shape = (256, 256, 3)
 classes = 14
 epochs = 200
-model_name = 'CNN'
 folder_name = 'CNN'
+model_name = 'CNN'
 now = datetime.now().strftime('%b%d_%H-%M-%S')
 
 # Ask for model restoration
-restore = input('Do you want to restore a model? Y/N')
+restore = input('Do you want to restore a model? Y/N : ')
 if restore.upper() == 'Y':
-    model = tfk.models.load_model(folder_name + "/" + model_name + "_best")
-    history = np.load(folder_name + "/" + model_name +
-                      "_best_history.npy", allow_pickle='TRUE').item()
+	# Restore model
+	model_to_restore = input('Insert the model name: ')
+	model = tfk.models.load_model(folder_name + "/" + model_to_restore + "/model", custom_objects={'f1':f1})
+	history = np.load(folder_name + "/" + model_to_restore +
+						"/history.npy", allow_pickle='TRUE').item()
 else:
-    # Build model (for data augmentation training)
-    # model = buildModel(input_shape, classes, tfk, tfkl, seed)
+	# Build model (for data augmentation training)
+	# model = buildModel(input_shape, classes, tfk, tfkl, seed)
 	model = buildModelVGG16(input_shape, classes, tfk, tfkl, seed)
 
-    # Create folders and callbacks and fit
+	# Checkpoint restoration
+	#restore = input('Do you want to restore a checkpoint? Y/N : ')
+	#if restore.upper() == 'Y':
+		# Restore checkpoint
+	#	check_to_restore = input('Insert the checkpoint name: ')
+	#	model.load_weights(folder_name + "/" + check_to_restore + "/ckpts")
+
+	# Create folders
+	exps_dir = os.path.join(folder_name)
+	if not os.path.exists(exps_dir):
+		os.makedirs(exps_dir)
+	exp_dir = os.path.join(exps_dir, model_name + '_' + str(now))
+	if not os.path.exists(exp_dir):
+		os.makedirs(exp_dir)
+	ckpt_dir = os.path.join(exp_dir, 'ckpts')
+	if not os.path.exists(ckpt_dir):
+		os.makedirs(ckpt_dir)
+
+	# Callbacks
 	callbacks = trainingCallbacks(
-        model_name=model_name, folder_name=folder_name, logs=False)
+		ckpt_dir=ckpt_dir, logs=False)
 
-    # Train the model
+	# Train the model
 	history = model.fit(
-        x=train_gen,
-        epochs=epochs,
-        validation_data=valid_gen,
-        callbacks=callbacks,
-    ).history
+		x=train_gen,
+		epochs=epochs,
+		validation_data=valid_gen,
+		callbacks=callbacks,
+	).history
 
-    # Save best epoch model
-	model.save(folder_name + "/" + model_name + '_' + str(now) + "_best")
+	# Save best epoch model
+	model.save(folder_name + "/" + model_name + '_' + str(now) + '/model')
 	np.save(folder_name + "/" + model_name + '_' +
-            str(now) + "_best_history.npy", history)
+			str(now) + "/history.npy", history)
 
 # Plot the training
 plt.figure(figsize=(15, 5))

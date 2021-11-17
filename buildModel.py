@@ -129,7 +129,8 @@ def buildModel(input_shape, classes, tfk, tfkl, seed):
 
     # Compile the model
     model.compile(loss=tfk.losses.CategoricalCrossentropy(),
-                  optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1, precision, recall])
+                  optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1])
+                  #optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1, precision, recall])
 
     # Return the model
     return model
@@ -171,50 +172,26 @@ def buildModelVGG16(input_shape, classes, tfk, tfkl, seed):
 
     # Compile the model
     tl_model.compile(loss=tfk.losses.CategoricalCrossentropy(),
-                     optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1, precision, recall])
+                     optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1])
+                     #optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1, precision, recall])
 
     # Return the model
     return tl_model
 
 
 # Callbacks function for training (callbacks, checkpointing, early stopping)
-def trainingCallbacks(model_name, folder_name, logs):
+def trainingCallbacks(ckpt_dir, logs):
 
     # Init callbacks
     callbacks = []
 
     # Create folders
     if logs:
-        exps_dir = os.path.join(folder_name)
-        if not os.path.exists(exps_dir):
-            os.makedirs(exps_dir)
-
-        now = datetime.now().strftime('%b%d_%H-%M-%S')
-
-        exp_dir = os.path.join(exps_dir, model_name + '_' + str(now))
-        if not os.path.exists(exp_dir):
-            os.makedirs(exp_dir)
-
-        # Model checkpoint
-        ckpt_dir = os.path.join(exp_dir, 'ckpts')
-        if not os.path.exists(ckpt_dir):
-            os.makedirs(ckpt_dir)
-
         ckpt_callback = tf.keras.callbacks.ModelCheckpoint(filepath=os.path.join(ckpt_dir, 'cp.ckpt'),
-                                                           save_weights_only=False,  # True to save only weights
-                                                           save_best_only=False)  # True to save only the best epoch
+                                                           save_weights_only=True,  # True to save only weights
+                                                           save_best_only=False,  # True to save only the best epoch
+														   save_freq=1996)
         callbacks.append(ckpt_callback)
-
-        # Visualize Learning on Tensorboard
-        tb_dir = os.path.join(exp_dir, 'tb_logs')
-        if not os.path.exists(tb_dir):
-            os.makedirs(tb_dir)
-
-        # By default shows losses and metrics for both training and validation
-        tb_callback = tf.keras.callbacks.TensorBoard(log_dir=tb_dir,
-                                                     profile_batch=0,
-                                                     histogram_freq=1)  # if > 0 (epochs) shows weights histograms
-        callbacks.append(tb_callback)
 
     # Early Stopping
     es_callback = tf.keras.callbacks.EarlyStopping(
