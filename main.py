@@ -4,28 +4,28 @@
 #							#
 #############################
 
-# Init message
+# Import needed libraries
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress warnings
+import tensorflow as tf
+tf.get_logger().setLevel('ERROR')
 import numpy as np
 from datetime import datetime
 from PIL import Image
 from sklearn.metrics import confusion_matrix
-from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import seaborn as sns
 import pandas as pd
 import random
-import tensorflow as tf
 from dataLoader import loadData
 from buildModel import buildModel, trainingCallbacks
-import os
+
+# Init message
 print('')
 print(' *** I tre neuroni ***')
 print('')
 
-# Import needed libraries
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress warnings
-tf.get_logger().setLevel('ERROR')
 
 # Test Keras version
 tfk = tf.keras
@@ -60,10 +60,6 @@ model_name = 'CNN'
 folder_name = 'CNN'
 now = datetime.now().strftime('%b%d_%H-%M-%S')
 
-# Callback registration
-callbacks = trainingCallbacks(
-    model_name=model_name, folder_name=folder_name, logs=False)
-
 # Ask for model restoration
 restore = input('Do you want to restore a model? Y/N')
 if restore.upper() == 'Y':
@@ -71,6 +67,10 @@ if restore.upper() == 'Y':
 else:
     # Build model (for data augmentation training)
     model = buildModel(input_shape, classes, tfk, tfkl, seed)
+
+    # Create folders and callbacks and fit
+    callbacks = trainingCallbacks(
+        model_name=model_name, folder_name=folder_name, logs=False)
 
     # Train the model
     history = model.fit(

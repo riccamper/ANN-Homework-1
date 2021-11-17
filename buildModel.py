@@ -5,14 +5,14 @@
 #############################
 
 # Import needed libraries
-import numpy as np
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
-import tensorflow as tf
-from keras import backend as K
-from datetime import datetime
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress warnings
+import tensorflow as tf
 tf.get_logger().setLevel('ERROR')
+import numpy as np
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+from keras import backend as K
+from datetime import datetime
 
 
 # Evaluation parameters
@@ -138,6 +138,9 @@ def buildModel(input_shape, classes, tfk, tfkl, seed):
 # Callbacks function for training (callbacks, checkpointing, early stopping)
 def trainingCallbacks(model_name, folder_name, logs):
 
+	# Init callbacks
+    callbacks = []
+
     # Create folders
     if logs:
         exps_dir = os.path.join(folder_name)
@@ -149,8 +152,6 @@ def trainingCallbacks(model_name, folder_name, logs):
         exp_dir = os.path.join(exps_dir, model_name + '_' + str(now))
         if not os.path.exists(exp_dir):
             os.makedirs(exp_dir)
-
-        callbacks = []
 
         # Model checkpoint
         ckpt_dir = os.path.join(exp_dir, 'ckpts')
