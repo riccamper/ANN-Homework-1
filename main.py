@@ -5,6 +5,10 @@
 #############################
 
 # Import needed libraries
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' # Suppress warnings
+import tensorflow as tf
+tf.get_logger().setLevel('ERROR') # Suppress warnings
 from buildModel import buildModel, buildModelVGG16, trainingCallbacks
 from dataLoader import loadData
 import random
@@ -16,10 +20,6 @@ from sklearn.metrics import confusion_matrix
 from PIL import Image
 from datetime import datetime
 import numpy as np
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress warnings
-import tensorflow as tf
-tf.get_logger().setLevel('ERROR')
 
 # Init message
 print('')

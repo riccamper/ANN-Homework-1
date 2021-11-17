@@ -5,14 +5,14 @@
 #############################
 
 # Import needed libraries
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' # Suppress warnings
+import tensorflow as tf
+tf.get_logger().setLevel('ERROR') # Suppress warnings
 from datetime import datetime
 from keras import backend as K
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 import numpy as np
-import tensorflow as tf
-tf.get_logger().setLevel('ERROR')
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress warnings
 
 
 # Evaluation parameters
