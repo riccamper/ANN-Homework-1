@@ -5,17 +5,38 @@
 #############################
 
 # Import needed libraries
+import numpy as np
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 import tensorflow as tf
+from keras import backend as K
 from datetime import datetime
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress warnings
 tf.get_logger().setLevel('ERROR')
-import numpy as np 
+
+
+# Evaluation parameters
+def recall_m(y_true, y_pred):
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+    recall = true_positives / (possible_positives + K.epsilon())
+    return recall
+
+
+def precision_m(y_true, y_pred):
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+    precision = true_positives / (predicted_positives + K.epsilon())
+    return precision
+
+
+def f1_m(y_true, y_pred):
+    precision = precision_m(y_true, y_pred)
+    recall = recall_m(y_true, y_pred)
+    return 2*((precision*recall)/(precision+recall+K.epsilon()))
+
 
 # Model builder function
-
-
 def buildModel(input_shape, classes, tfk, tfkl, seed):
     # (Conv + ReLU + MaxPool) x 5 + FC x 2
 
@@ -108,7 +129,7 @@ def buildModel(input_shape, classes, tfk, tfkl, seed):
 
     # Compile the model
     model.compile(loss=tfk.losses.CategoricalCrossentropy(),
-                  optimizer=tfk.optimizers.Adam(), metrics='accuracy')
+                  optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1_m, precision_m, recall_m])
 
     # Return the model
     return model
