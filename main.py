@@ -60,6 +60,10 @@ model_name = 'CNN'
 folder_name = 'CNN'
 now = datetime.now().strftime('%b%d_%H-%M-%S')
 
+# Callback registration
+callbacks = trainingCallbacks(
+    model_name=model_name, folder_name=folder_name, logs=False)
+
 # Ask for model restoration
 restore = input('Do you want to restore a model? Y/N')
 if restore.upper() == 'Y':
@@ -67,10 +71,6 @@ if restore.upper() == 'Y':
 else:
     # Build model (for data augmentation training)
     model = buildModel(input_shape, classes, tfk, tfkl, seed)
-
-    # Create folders and callbacks and fit
-    callbacks = trainingCallbacks(
-        model_name=model_name, folder_name=folder_name, logs=False)
 
     # Train the model
     history = model.fit(
