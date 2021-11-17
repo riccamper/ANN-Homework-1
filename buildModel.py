@@ -190,7 +190,7 @@ def trainingCallbacks(ckpt_dir, logs):
         ckpt_callback = tf.keras.callbacks.ModelCheckpoint(filepath=os.path.join(ckpt_dir, 'cp.ckpt'),
                                                            save_weights_only=True,  # True to save only weights
                                                            save_best_only=False,  # True to save only the best epoch
-														   save_freq=1996)
+														   save_freq=1996*5) # Save 1 time in 5 epochs
         callbacks.append(ckpt_callback)
 
     # Early Stopping
