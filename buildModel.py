@@ -210,7 +210,7 @@ def trainingCallbacks(ckpt_dir, logs):
     callbacks = []
 
     # Create folders
-    if logs:
+    if logs is True:
         ckpt_callback = tf.keras.callbacks.ModelCheckpoint(filepath=os.path.join(ckpt_dir, 'cp.ckpt'),
                                                            save_weights_only=True,  # True to save only weights
                                                            save_best_only=False,  # True to save only the best epoch
