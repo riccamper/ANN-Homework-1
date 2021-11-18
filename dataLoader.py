@@ -7,9 +7,8 @@
 # Import needed libraries
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
+
 # Data loader function
-
-
 def loadData(training_dir, validation_split, seed):
     # Images are divided into folders, one for each class.
     # If the images are organized in such a way, we can exploit the

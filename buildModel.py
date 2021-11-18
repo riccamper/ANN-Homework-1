@@ -5,14 +5,14 @@
 #############################
 
 # Import needed libraries
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' # Suppress warnings
-import tensorflow as tf
-tf.get_logger().setLevel('ERROR') # Suppress warnings
-from datetime import datetime
-from keras import backend as K
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 import numpy as np
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+from keras import backend as K
+from datetime import datetime
+import tensorflow as tf
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress warnings
+tf.get_logger().setLevel('ERROR')  # Suppress warnings
 
 
 # Evaluation parameters
@@ -130,7 +130,7 @@ def buildModel(input_shape, classes, tfk, tfkl, seed):
     # Compile the model
     model.compile(loss=tfk.losses.CategoricalCrossentropy(),
                   optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1])
-                  #optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1, precision, recall])
+                  # optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1, precision, recall])
 
     # Return the model
     return model
@@ -173,10 +173,34 @@ def buildModelVGG16(input_shape, classes, tfk, tfkl, seed):
     # Compile the model
     tl_model.compile(loss=tfk.losses.CategoricalCrossentropy(),
                      optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1])
-                     #optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1, precision, recall])
+                     # optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1, precision, recall])
 
     # Return the model
     return tl_model
+
+
+# Model builder function (VGG16 Fine Tuning)
+def buildModelVGG16FT(model, tfk):
+    # VGG16 Fine Tuning
+
+	# Set all VGG layers to True
+	model.get_layer('vgg16').trainable = True
+	for i, layer in enumerate(model.get_layer('vgg16').layers):
+		print(i, layer.name, layer.trainable)
+
+	# Freeze first N layers, e.g., until 14th
+	for i, layer in enumerate(model.get_layer('vgg16').layers[:14]):
+		layer.trainable = False
+	for i, layer in enumerate(model.get_layer('vgg16').layers):
+		print(i, layer.name, layer.trainable)
+	model.summary()
+
+	# Compile the model
+	model.compile(loss=tfk.losses.CategoricalCrossentropy(),
+	              optimizer=tfk.optimizers.Adam(1e-4), metrics=['accuracy', f1])
+
+    # Return the model
+	return model
 
 
 # Callbacks function for training (callbacks, checkpointing, early stopping)

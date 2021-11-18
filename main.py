@@ -9,7 +9,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' # Suppress warnings
 import tensorflow as tf
 tf.get_logger().setLevel('ERROR') # Suppress warnings
-from buildModel import buildModel, buildModelVGG16, trainingCallbacks, f1
+from buildModel import buildModel, buildModelVGG16, buildModelVGG16FT, trainingCallbacks, f1
 from dataLoader import loadData
 import random
 import pandas as pd
@@ -61,8 +61,8 @@ folder_name = 'CNN'
 model_name = 'CNN'
 now = datetime.now().strftime('%b%d_%H-%M-%S')
 
-# Ask for model restoration
-restore = input('Do you want to restore a model? Y/N : ')
+# Ask for model restoration (Transfer Learning)
+restore = input('Do you want to restore a model (Transfer Learning)? Y/N : ')
 if restore.upper() == 'Y':
 	# Restore model
 	model_to_restore = input('Insert the model name: ')
@@ -88,7 +88,7 @@ else:
 	exp_dir = os.path.join(exps_dir, model_name + '_' + str(now))
 	if not os.path.exists(exp_dir):
 		os.makedirs(exp_dir)
-	ckpt_dir = os.path.join(exp_dir, 'ckpts')
+	ckpt_dir = os.path.join(exp_dir, 'ckpts_ft')
 	if not os.path.exists(ckpt_dir):
 		os.makedirs(ckpt_dir)
 
@@ -108,6 +108,47 @@ else:
 	model.save(folder_name + "/" + model_name + '_' + str(now) + '/model')
 	np.save(folder_name + "/" + model_name + '_' +
 			str(now) + "/history.npy", history)
+
+
+# Ask for model restoration (Fine Tuning)
+restore = input('Do you want to restore a model (Fine Tuning)? Y/N : ')
+if restore.upper() == 'Y':
+	# Restore model
+	model_to_restore = input('Insert the model name: ')
+	model = tfk.models.load_model(folder_name + "/" + model_to_restore + "/model_ft", custom_objects={'f1':f1})
+	history = np.load(folder_name + "/" + model_to_restore +
+						"/history_ft.npy", allow_pickle='TRUE').item()
+else:
+	# Build model (Fine Tuning)
+	model = buildModelVGG16FT(model, tfk)
+
+	# Create folders
+	exps_dir = os.path.join(folder_name)
+	if not os.path.exists(exps_dir):
+		os.makedirs(exps_dir)
+	exp_dir = os.path.join(exps_dir, model_name + '_' + str(now))
+	if not os.path.exists(exp_dir):
+		os.makedirs(exp_dir)
+	ckpt_dir = os.path.join(exp_dir, 'ckpts')
+	if not os.path.exists(ckpt_dir):
+		os.makedirs(ckpt_dir)
+
+	# Callbacks
+	callbacks = trainingCallbacks(
+		ckpt_dir=ckpt_dir, logs=False)
+
+	# Train the model
+	history = model.fit(
+		x=train_gen,
+		epochs=epochs,
+		validation_data=valid_gen,
+		callbacks=callbacks,
+	).history
+
+	# Save best epoch model
+	model.save(folder_name + "/" + model_name + '_' + str(now) + '/model_ft')
+	np.save(folder_name + "/" + model_name + '_' +
+			str(now) + "/history_ft.npy", history)
 
 # Plot the training
 plt.figure(figsize=(15, 5))
