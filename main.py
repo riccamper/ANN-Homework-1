@@ -94,7 +94,7 @@ else:
 
 	# Callbacks
 	callbacks = trainingCallbacks(
-		ckpt_dir=ckpt_dir, logs=True)
+		ckpt_dir=ckpt_dir, logs=False)
 
 	# Train the model
 	history = model.fit(
