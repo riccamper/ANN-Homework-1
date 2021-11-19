@@ -147,7 +147,8 @@ def buildModelVGG16(input_shape, classes, tfk, tfkl, seed):
     supernet = tfk.applications.VGG16(
         include_top=False,
         weights="imagenet",
-        input_shape=input_shape#(64, 64, 3)
+        #input_shape=input_shape
+		input_shape=(64, 64, 3)
 	)
     print()
     print('VGG16 Supernet:')
@@ -158,8 +159,8 @@ def buildModelVGG16(input_shape, classes, tfk, tfkl, seed):
     supernet.trainable = False
 
     inputs = tfk.Input(shape=input_shape, name='Input')
-    #x = tfkl.Resizing(64, 64, interpolation="bicubic")(inputs)
-    x = supernet(inputs)
+    x = tfkl.Resizing(64, 64, interpolation="bicubic")(inputs)
+    x = supernet(x)
     x = tfkl.Flatten(name='Flattening')(x)
     x = tfkl.Dropout(0.3, seed=seed)(x)
     x = tfkl.Dense(
