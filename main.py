@@ -50,7 +50,7 @@ training_dir = os.path.join(dataset_dir, 'training')
 
 # Load dataset
 train_val_gen = loadData(training_dir, 0.1, seed)
-train_gen = train_val_gen['train']
+train_gen = train_val_gen['train_no_aug']
 valid_gen = train_val_gen['validation']
 
 # Model metadata
