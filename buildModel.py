@@ -131,6 +131,7 @@ def buildModel(input_shape, classes, tfk, tfkl, seed):
     model.compile(loss=tfk.losses.CategoricalCrossentropy(),
                   optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1])
                   # optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1, precision, recall])
+    model.summary()
 
     # Return the model
     return model
