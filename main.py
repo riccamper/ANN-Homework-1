@@ -16,6 +16,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.metrics import confusion_matrix
 from PIL import Image
 from datetime import datetime
@@ -49,7 +50,7 @@ training_dir = os.path.join(dataset_dir, 'training')
 # test_dir = os.path.join(dataset_dir, 'test')
 
 # Load dataset
-batch_size = 8
+batch_size = 64
 train_val_gen = loadData(training_dir, 0.1, seed, batch_size)
 train_gen = train_val_gen['train_no_aug']
 valid_gen = train_val_gen['validation']

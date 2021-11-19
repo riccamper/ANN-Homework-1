@@ -4,15 +4,17 @@
 #							#
 #############################
 
+# Base
+import tensorflow as tf
+tf.get_logger().setLevel('ERROR')  # Suppress warnings
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress warnings
+
 # Import needed libraries
 import numpy as np
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from keras import backend as K
 from datetime import datetime
-import tensorflow as tf
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress warnings
-tf.get_logger().setLevel('ERROR')  # Suppress warnings
 
 
 # Evaluation parameters
@@ -145,17 +147,19 @@ def buildModelVGG16(input_shape, classes, tfk, tfkl, seed):
     supernet = tfk.applications.VGG16(
         include_top=False,
         weights="imagenet",
-        input_shape=(64, 64, 3)
-    )
+        input_shape=input_shape#(64, 64, 3)
+	)
+    print()
+    print('VGG16 Supernet:')
     supernet.summary()
-    # tfk.utils.plot_model(supernet)
+    #tfk.utils.plot_model(supernet)
 
     # Use the supernet as feature extractor
     supernet.trainable = False
 
     inputs = tfk.Input(shape=input_shape, name='Input')
-    x = tfkl.Resizing(64, 64, interpolation="bicubic")(inputs)
-    x = supernet(x)
+    #x = tfkl.Resizing(64, 64, interpolation="bicubic")(inputs)
+    x = supernet(inputs)
     x = tfkl.Flatten(name='Flattening')(x)
     x = tfkl.Dropout(0.3, seed=seed)(x)
     x = tfkl.Dense(
@@ -175,6 +179,9 @@ def buildModelVGG16(input_shape, classes, tfk, tfkl, seed):
     tl_model.compile(loss=tfk.losses.CategoricalCrossentropy(),
                      optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1])
                      # optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1, precision, recall])
+    print()
+    print('VGG16 Transfer Learning:')
+    tl_model.summary()
 
     # Return the model
     return tl_model
@@ -186,19 +193,17 @@ def buildModelVGG16FT(model, tfk):
 
 	# Set all VGG layers to True
 	model.get_layer('vgg16').trainable = True
-	for i, layer in enumerate(model.get_layer('vgg16').layers):
-		print(i, layer.name, layer.trainable)
 
 	# Freeze first N layers, e.g., until 14th
 	for i, layer in enumerate(model.get_layer('vgg16').layers[:14]):
 		layer.trainable = False
-	for i, layer in enumerate(model.get_layer('vgg16').layers):
-		print(i, layer.name, layer.trainable)
-	model.summary()
 
 	# Compile the model
 	model.compile(loss=tfk.losses.CategoricalCrossentropy(),
 	              optimizer=tfk.optimizers.Adam(1e-4), metrics=['accuracy', f1])
+	print()
+	print('VGG16 Fine Tuning:')
+	model.summary()
 
     # Return the model
 	return model
