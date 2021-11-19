@@ -6,6 +6,7 @@
 
 # Import needed libraries
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+import matplotlib.pyplot as plt
 
 
 # Data loader function
@@ -21,7 +22,7 @@ def loadData(training_dir, validation_split, seed):
                                         zoom_range=0.3,
                                         horizontal_flip=True,
                                         vertical_flip=True,
-                                        fill_mode='reflect',
+                                        #fill_mode='reflect',
                                         rescale=1/255.,  # rescale value is multiplied to the image
                                         validation_split=validation_split)
 
