@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 
 # Data loader function
-def loadData(training_dir, validation_split, seed):
+def loadData(training_dir, validation_split, seed, batch_size):
     # Images are divided into folders, one for each class.
     # If the images are organized in such a way, we can exploit the
     # ImageDataGenerator to read them from disk.
@@ -40,7 +40,7 @@ def loadData(training_dir, validation_split, seed):
                                                    color_mode='rgb',
                                                    classes=None,  # can be set to labels
                                                    class_mode='categorical',
-                                                   batch_size=8,
+                                                   batch_size=batch_size,
                                                    shuffle=True,
                                                    seed=seed,
                                                    subset='training')
@@ -52,7 +52,7 @@ def loadData(training_dir, validation_split, seed):
                                                                  color_mode='rgb',
                                                                  classes=None,  # can be set to labels
                                                                  class_mode='categorical',
-                                                                 batch_size=8,
+                                                                 batch_size=batch_size,
                                                                  shuffle=True,
                                                                  seed=seed,
                                                                  subset='training')
@@ -63,7 +63,7 @@ def loadData(training_dir, validation_split, seed):
                                                    color_mode='rgb',
                                                    classes=None,  # can be set to labels
                                                    class_mode='categorical',
-                                                   batch_size=8,
+                                                   batch_size=batch_size,
                                                    shuffle=True,
                                                    seed=seed,
                                                    subset='validation')
