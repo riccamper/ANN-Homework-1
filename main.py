@@ -65,6 +65,9 @@ now = datetime.now().strftime('%b%d_%H-%M-%S')
 
 # Ask for model restoration (Transfer Learning)
 restore = input('Do you want to restore a model (Transfer Learning)? Y/N : ')
+# Ask for model restoration (Fine Tuning)
+restore = input('Do you want to restore a model (Fine Tuning)? Y/N : ')
+
 if restore.upper() == 'Y':
 	# Restore model
 	model_to_restore = input('Insert the model name: ')
@@ -112,9 +115,7 @@ else:
 			str(now) + "/history.npy", history)
 
 
-# Ask for model restoration (Fine Tuning)
-restore = input('Do you want to restore a model (Fine Tuning)? Y/N : ')
-if restore.upper() == 'Y':
+if restore2.upper() == 'Y':
 	# Restore model
 	model_to_restore = input('Insert the model name: ')
 	model = tfk.models.load_model(folder_name + "/" + model_to_restore + "/model_ft", custom_objects={'f1':f1})
