@@ -112,7 +112,7 @@ else:
 
 
 # Ask for model restoration (Fine Tuning)
-restore = input('Do you want to restore a model (Fine Tuning)? Y/N : ')
+"""restore = input('Do you want to restore a model (Fine Tuning)? Y/N : ')
 if restore.upper() == 'Y':
 	# Restore model
 	model_to_restore = input('Insert the model name: ')
@@ -149,7 +149,7 @@ else:
 	# Save best epoch model
 	model.save(folder_name + "/" + model_name + '_' + str(now) + '/model_ft')
 	np.save(folder_name + "/" + model_name + '_' +
-			str(now) + "/history_ft.npy", history)
+			str(now) + "/history_ft.npy", history)"""
 
 # Plot the training
 plt.figure(figsize=(15, 5))
