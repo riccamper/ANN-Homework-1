@@ -72,8 +72,8 @@ if restore.upper() == 'Y':
 						"/history.npy", allow_pickle='TRUE').item()
 else:
 	# Build model (for data augmentation training)
-	# model = buildModel(input_shape, classes, tfk, tfkl, seed)
-	model = buildModelVGG16(input_shape, classes, tfk, tfkl, seed)
+	model = buildModel(input_shape, classes, tfk, tfkl, seed)
+	#model = buildModelVGG16(input_shape, classes, tfk, tfkl, seed)
 
 	# Checkpoint restoration
 	#restore = input('Do you want to restore a checkpoint? Y/N : ')
