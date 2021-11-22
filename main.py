@@ -9,7 +9,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' # Suppress warnings
 import tensorflow as tf
 tf.get_logger().setLevel('ERROR') # Suppress warnings
-from buildModel import buildModel, buildModelVGG16, buildModelVGG16FT, trainingCallbacks, f1
+from buildModel import buildModel, buildModelVGG16, buildModelVGG16FT, trainingCallbacks, f1, buildModelAlpha, buildModelVGG16Full
 from dataLoader import loadData
 import random
 import pandas as pd
@@ -50,9 +50,9 @@ training_dir = os.path.join(dataset_dir, 'training')
 # test_dir = os.path.join(dataset_dir, 'test')
 
 # Load dataset
-batch_size = 8
+batch_size = 32
 train_val_gen = loadData(training_dir, 0.1, seed, batch_size)
-train_gen = train_val_gen['train_no_aug']
+train_gen = train_val_gen['train']
 valid_gen = train_val_gen['validation']
 
 # Model metadata
@@ -66,7 +66,7 @@ now = datetime.now().strftime('%b%d_%H-%M-%S')
 # Ask for model restoration (Transfer Learning)
 restore = input('Do you want to restore a model (Transfer Learning)? Y/N : ')
 # Ask for model restoration (Fine Tuning)
-restore = input('Do you want to restore a model (Fine Tuning)? Y/N : ')
+restore2 = input('Do you want to restore a model (Fine Tuning)? Y/N : ')
 
 if restore.upper() == 'Y':
 	# Restore model
@@ -76,7 +76,7 @@ if restore.upper() == 'Y':
 						"/history.npy", allow_pickle='TRUE').item()
 else:
 	# Build model (for data augmentation training)
-	#model = buildModel(input_shape, classes, tfk, tfkl, seed)
+	#model = buildModelAlpha(input_shape, classes, tfk, tfkl, seed)
 	model = buildModelVGG16(input_shape, classes, tfk, tfkl, seed)
 
 	# Checkpoint restoration
