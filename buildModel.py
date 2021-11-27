@@ -1,6 +1,6 @@
 #############################
 #							#
-# BuildModel.py				#
+#       BuildModel.py		#
 #							#
 #############################
 
@@ -11,19 +11,17 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress warnings
 
 # Import needed libraries
-import numpy as np
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from keras import backend as K
-from datetime import datetime
 
+######################################
+#   PARAMETER EVALUATION FUNCTIONS   #
+######################################
 
-# Evaluation parameters
 def recall(y_true, y_pred):
     true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
     possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
     recall = true_positives / (possible_positives + K.epsilon())
     return recall
-
 
 def precision(y_true, y_pred):
     true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
@@ -31,123 +29,16 @@ def precision(y_true, y_pred):
     precision = true_positives / (predicted_positives + K.epsilon())
     return precision
 
-
 def f1(y_true, y_pred):
     precision2 = precision(y_true, y_pred)
     recall2 = recall(y_true, y_pred)
     return 2*((precision2*recall2)/(precision2+recall2+K.epsilon()))
 
-def buildModelAlpha(input_shape, classes, tfk, tfkl, seed):
-    
-    model = tfk.Sequential(name = 'Model', layers = [
-        tfkl.InputLayer(input_shape=input_shape, name='Input'),
+################################
+#   MODEL CREATION FUNCTIONS   #
+################################
 
-        tfkl.Conv2D(
-            filters = 16,
-            kernel_size = 5,
-            padding = 'same',
-            activation = 'relu',
-            kernel_initializer=tfk.initializers.GlorotUniform(seed)
-        ),
-        tfkl.BatchNormalization(),
-        tfkl.MaxPooling2D( pool_size = 2 ),
-
-        tfkl.Conv2D(
-            filters = 32,
-            kernel_size = 3,
-            padding = 'same',
-            activation = 'relu',
-            kernel_initializer=tfk.initializers.GlorotUniform(seed)
-        ),
-        tfkl.BatchNormalization(),
-        tfkl.MaxPooling2D( pool_size = 2 ),
-
-        tfkl.Conv2D(
-            filters = 64,
-            kernel_size = 3,
-            padding = 'same',
-            activation = 'relu',
-            kernel_initializer=tfk.initializers.GlorotUniform(seed)
-        ),
-        tfkl.Conv2D(
-            filters = 64,
-            kernel_size = 3,
-            padding = 'same',
-            activation = 'relu',
-            kernel_initializer=tfk.initializers.GlorotUniform(seed)
-        ),
-        tfkl.BatchNormalization(),
-        tfkl.MaxPooling2D( pool_size = 2 ),
-
-        #tfkl.Conv2D(
-        #    filters = 128,
-        #    kernel_size = 3,
-        #    padding = 'same',
-        #    activation = 'relu',
-        #    kernel_initializer=tfk.initializers.GlorotUniform(seed)
-        #),
-        #tfkl.Conv2D(
-        #    filters = 128,
-        #    kernel_size = 3,
-        #    padding = 'same',
-        #    activation = 'relu',
-        #    kernel_initializer=tfk.initializers.GlorotUniform(seed)
-        #),
-        #tfkl.BatchNormalization(),
-        #tfkl.MaxPooling2D( pool_size = 2 ),
-
-        tfkl.Conv2D(
-            filters = 128,
-            kernel_size = 3,
-            padding = 'same',
-            activation = 'relu',
-            kernel_initializer=tfk.initializers.GlorotUniform(seed)
-        ),
-        tfkl.Conv2D(
-            filters = 128,
-            kernel_size = 3,
-            padding = 'same',
-            activation = 'relu',
-            kernel_initializer=tfk.initializers.GlorotUniform(seed)
-        ),
-        tfkl.BatchNormalization(),
-        tfkl.MaxPooling2D( pool_size = 4 ),
-
-        tfkl.Flatten(),
-        tfkl.Dropout( rate = 0.3, seed = seed ),
-        tfkl.Dense(
-            units = 256,
-            name='FC1', 
-            kernel_initializer=tfk.initializers.GlorotUniform(seed), 
-            activation='relu'
-        ),
-        tfkl.Dropout( rate = 0.3, seed = seed ),
-        tfkl.Dense(
-            units = 64,
-            name='FC2', 
-            kernel_initializer=tfk.initializers.GlorotUniform(seed), 
-            activation='relu'
-        ),
-        tfkl.Dropout( rate = 0.1, seed = seed ),
-        tfkl.Dense(
-            units=classes, 
-            activation='softmax', 
-            kernel_initializer=tfk.initializers.GlorotUniform(seed), 
-            name='Output'
-        )
-    ])
-
-    model.compile(
-        loss=tfk.losses.CategoricalCrossentropy(),
-        optimizer=tfk.optimizers.Adam(learning_rate = 0.001, epsilon = 1e-8), 
-        metrics=['accuracy', f1]
-    )
-
-    model.summary()
-
-    return model
-
-# Model builder function
+#Model builder function (Simple Deep Network)
 def buildModel(input_shape, classes, tfk, tfkl, seed):
     # (Conv + ReLU + MaxPool) x 5 + FC x 2
 
@@ -242,12 +133,111 @@ def buildModel(input_shape, classes, tfk, tfkl, seed):
     model.compile(loss=tfk.losses.CategoricalCrossentropy(),
                   optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1])
                   # optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1, precision, recall])
+    print()
+    print('5-layer Network:')
     model.summary()
 
     # Return the model
     return model
 
-def buildModelVGG16Full(input_shape, classes, tfk, tfkl, seed):
+#Model builder function (VGG16-like network)
+def buildModelAlpha(input_shape, classes, tfk, tfkl, seed):
+    
+    model = tfk.Sequential(name = 'Model', layers = [
+        tfkl.InputLayer(input_shape=input_shape, name='Input'),
+
+        tfkl.Conv2D(
+            filters = 16,
+            kernel_size = 5,
+            padding = 'same',
+            activation = 'relu',
+            kernel_initializer=tfk.initializers.GlorotUniform(seed)
+        ),
+        tfkl.BatchNormalization(),
+        tfkl.MaxPooling2D( pool_size = 2 ),
+
+        tfkl.Conv2D(
+            filters = 32,
+            kernel_size = 3,
+            padding = 'same',
+            activation = 'relu',
+            kernel_initializer=tfk.initializers.GlorotUniform(seed)
+        ),
+        tfkl.BatchNormalization(),
+        tfkl.MaxPooling2D( pool_size = 2 ),
+
+        tfkl.Conv2D(
+            filters = 64,
+            kernel_size = 3,
+            padding = 'same',
+            activation = 'relu',
+            kernel_initializer=tfk.initializers.GlorotUniform(seed)
+        ),
+        tfkl.Conv2D(
+            filters = 64,
+            kernel_size = 3,
+            padding = 'same',
+            activation = 'relu',
+            kernel_initializer=tfk.initializers.GlorotUniform(seed)
+        ),
+        tfkl.BatchNormalization(),
+        tfkl.MaxPooling2D( pool_size = 2 ),
+
+        tfkl.Conv2D(
+            filters = 128,
+            kernel_size = 3,
+            padding = 'same',
+            activation = 'relu',
+            kernel_initializer=tfk.initializers.GlorotUniform(seed)
+        ),
+        tfkl.Conv2D(
+            filters = 128,
+            kernel_size = 3,
+            padding = 'same',
+            activation = 'relu',
+            kernel_initializer=tfk.initializers.GlorotUniform(seed)
+        ),
+        tfkl.BatchNormalization(),
+        tfkl.MaxPooling2D( pool_size = 2 ),
+
+        tfkl.Flatten(),
+        tfkl.Dropout( rate = 0.3, seed = seed ),
+        tfkl.Dense(
+            units = 256,
+            name='FC1', 
+            kernel_initializer=tfk.initializers.GlorotUniform(seed), 
+            activation='relu'
+        ),
+        tfkl.Dropout( rate = 0.3, seed = seed ),
+        tfkl.Dense(
+            units = 64,
+            name='FC2', 
+            kernel_initializer=tfk.initializers.GlorotUniform(seed), 
+            activation='relu'
+        ),
+        tfkl.Dropout( rate = 0.1, seed = seed ),
+        tfkl.Dense(
+            units=classes, 
+            activation='softmax', 
+            kernel_initializer=tfk.initializers.GlorotUniform(seed), 
+            name='Output'
+        )
+    ])
+
+    model.compile(
+        loss=tfk.losses.CategoricalCrossentropy(),
+        optimizer=tfk.optimizers.Adam(learning_rate = 0.001, epsilon = 1e-8), 
+        metrics=['accuracy', f1]
+    )
+
+    print()
+    print('VGG-like Network:')
+    model.summary()
+
+    return model
+
+# Model builder function (VGG16 Transfer Learning)
+def buildModelVGG16TL(input_shape, classes, tfk, tfkl, seed):
     # VGG16
 
     # Supernet
@@ -257,56 +247,10 @@ def buildModelVGG16Full(input_shape, classes, tfk, tfkl, seed):
         #input_shape=input_shape
 		input_shape=(64, 64, 3)
 	)
+
     print()
     print('VGG16 Supernet:')
     supernet.summary()
-    #tfk.utils.plot_model(supernet)
-
-    inputs = tfk.Input(shape=input_shape, name='Input')
-    x = tfkl.Resizing(64, 64, interpolation="bicubic")(inputs)
-    x = supernet(x)
-    x = tfkl.Flatten(name='Flattening')(x)
-    x = tfkl.Dropout(0.3, seed=seed)(x)
-    x = tfkl.Dense(
-        256,
-        activation='relu',
-        kernel_initializer=tfk.initializers.GlorotUniform(seed))(x)
-    x = tfkl.Dropout(0.3, seed=seed)(x)
-    outputs = tfkl.Dense(
-        classes,
-        activation='softmax',
-        kernel_initializer=tfk.initializers.GlorotUniform(seed))(x)
-
-    # Connect input and output through the Model class
-    tl_model = tfk.Model(inputs=inputs, outputs=outputs, name='model')
-
-    # Compile the model
-    tl_model.compile(loss=tfk.losses.CategoricalCrossentropy(),
-                     optimizer=tfk.optimizers.Adam(learning_rate = 0.001, epsilon = 1e-8), metrics=['accuracy', f1])
-                     # optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1, precision, recall])
-    print()
-    print('VGG16 Transfer Learning:')
-    tl_model.summary()
-
-    # Return the model
-    return tl_model
-
-
-# Model builder function (VGG16)
-def buildModelVGG16(input_shape, classes, tfk, tfkl, seed):
-    # VGG16
-
-    # Supernet
-    supernet = tfk.applications.VGG16(
-        include_top=False,
-        weights="imagenet",
-        #input_shape=input_shape
-		input_shape=(64, 64, 3)
-	)
-    print()
-    print('VGG16 Supernet:')
-    supernet.summary()
-    #tfk.utils.plot_model(supernet)
 
     # Use the supernet as feature extractor
     supernet.trainable = False
@@ -332,14 +276,12 @@ def buildModelVGG16(input_shape, classes, tfk, tfkl, seed):
     # Compile the model
     tl_model.compile(loss=tfk.losses.CategoricalCrossentropy(),
                      optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1])
-                     # optimizer=tfk.optimizers.Adam(), metrics=['accuracy', f1, precision, recall])
     print()
     print('VGG16 Transfer Learning:')
     tl_model.summary()
 
     # Return the model
     return tl_model
-
 
 # Model builder function (VGG16 Fine Tuning)
 def buildModelVGG16FT(model, tfk):
@@ -362,25 +304,57 @@ def buildModelVGG16FT(model, tfk):
     # Return the model
 	return model
 
+# Model builder function (Inception ResNet V2 Transfer Learning)
+def buildModelInceptionTL(input_shape, classes, tfk, tfkl, seed):
+    supernet = tfk.applications.InceptionResNetV2(
+        include_top=False,
+        weights="imagenet",
+        input_shape=input_shape
+    )
 
-# Callbacks function for training (callbacks, checkpointing, early stopping)
-def trainingCallbacks(ckpt_dir, logs):
+    print()
+    print('Inception ResNet V2 Supernet:')
+    supernet.summary()
 
-    # Init callbacks
-    callbacks = []
+    supernet.trainable = False
 
-    # Create folders
-    if logs is True:
-        ckpt_callback = tf.keras.callbacks.ModelCheckpoint(filepath=os.path.join(ckpt_dir, 'cp.ckpt'),
-                                                           save_weights_only=True,  # True to save only weights
-                                                           save_best_only=False,  # True to save only the best epoch
-														   save_freq=1996*5) # Save 1 time in 5 epochs
-        callbacks.append(ckpt_callback)
+    inputs = tfk.Input(shape=input_shape)
+    x = supernet(inputs)
+    x = tfkl.Flatten(name='Flattening')(x)
+    x = tfkl.Dropout(0.3, seed=seed)(x)
+    x = tfkl.Dense(
+        512, 
+        activation='relu',
+        kernel_initializer = tfk.initializers.GlorotUniform(seed))(x)
+    x = tfkl.Dropout(0.3, seed=seed)(x)
+    outputs = tfkl.Dense(
+        classes, 
+        activation='softmax',
+        kernel_initializer = tfk.initializers.GlorotUniform(seed))(x)
 
-    # Early Stopping
-    es_callback = tf.keras.callbacks.EarlyStopping(
-        monitor='val_loss', patience=10, restore_best_weights=True)
-    callbacks.append(es_callback)
 
-    # Return callbacks
-    return callbacks
+    # Connect input and output through the Model class
+    tl_model = tfk.Model(inputs=inputs, outputs=outputs, name='model')
+
+    # Compile the model
+    tl_model.compile(loss=tfk.losses.CategoricalCrossentropy(), optimizer=tfk.optimizers.Adam(), metrics=['accuracy',f1])
+    print()
+    print('Inception ResNet V2 Transfer Learning:')
+    tl_model.summary()
+
+    return tl_model
+
+# Model builder function (Inception ResNet V2 Fine Tuning)
+def buildModelInceptionFT(ft_model, tfk):
+    ft_model.get_layer('inception_resnet_v2').trainable = True
+
+    for layer in ft_model.get_layer('inception_resnet_v2').layers[:617] :
+        layer.trainable=False
+
+    ft_model.compile(loss=tfk.losses.CategoricalCrossentropy(), optimizer=tfk.optimizers.Adam(1e-4), metrics=['accuracy',f1])
+
+    print()
+    print('Inception ResNet V2 Fine Tuning:')
+    ft_model.summary()
+
+    return ft_model

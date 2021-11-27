@@ -1,5 +1,0 @@
-Test metrics:
-{'loss': 0.4308006167411804, 'accuracy': 0.8532577753067017, 'f1': 0.8553345799446106}
-Duration: ~8.30h
-Last epoch: "Epoch 54/200"
-1996/1996 [==============================] - 538s 269ms/step - loss: 0.7105 - accuracy: 0.7740 - f1: 0.7674 - val_loss: 0.4482 - val_accuracy: 0.8584 - val_f1: 0.8418
