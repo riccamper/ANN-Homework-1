@@ -1,4 +1,4 @@
-# ANN-Homehork-1
+# ANN-Homework-1
 ## 2021 - First Homework
 Image Classification
 Welcome to the first Homework of the Artificial Neural Networks and Deep Learning course! You have the opportunity to test what you learned during the course. We set up a competition to make things more fun! 😎
