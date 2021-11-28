@@ -1,7 +1,5 @@
 #############################
-#							#
-#         Main.py			#
-#							#
+#         MAIN.PY           #
 #############################
 
 # Import needed libraries
@@ -490,3 +488,4 @@ elif model_type == '4':
     plt.xlabel('True labels')
     plt.ylabel('Predicted labels')
     plt.show()
+	

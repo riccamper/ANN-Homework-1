@@ -1,7 +1,5 @@
 #############################
-#							#
-#       DataLoader.py		#
-#							#
+#       DATALOADER.PY       #
 #############################
 
 # Import needed libraries
@@ -64,13 +62,16 @@ def loadData(training_dir, validation_dir, seed, batch_size):
 
 #Function for loading input data using a preprocessing function
 def loadPreprocessedData(training_dir, validation_dir, seed, batch_size, preprocess_input):
+
+	# Obtain a data generator with preprocessing
     train_data_gen = ImageDataGenerator(rotation_range=30,
                                             height_shift_range=50,
                                             width_shift_range=50,
                                             zoom_range=0.3,
                                             horizontal_flip=True,
                                             vertical_flip=True,
-                                            preprocessing_function=preprocess_input) 
+                                            preprocessing_function=preprocess_input)
+
     # Obtain a data generator with the 'ImageDataGenerator.flow_from_directory' method
     train_gen = train_data_gen.flow_from_directory(directory=training_dir,
                                                         target_size=(256,256),
@@ -82,8 +83,10 @@ def loadPreprocessedData(training_dir, validation_dir, seed, batch_size, preproc
                                                         seed=seed)
 
 
+	# Obtain a data generator with preprocessing
     valid_data_gen = ImageDataGenerator(preprocessing_function=preprocess_input)
 
+    # Obtain a data generator with the 'ImageDataGenerator.flow_from_directory' method
     valid_gen = valid_data_gen.flow_from_directory(directory=validation_dir,
                                                 target_size=(256,256),
                                                 color_mode='rgb',
